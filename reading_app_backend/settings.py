@@ -176,3 +176,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # メディアファイル設定
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 静的ファイル設定
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# 本番環境用設定
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
