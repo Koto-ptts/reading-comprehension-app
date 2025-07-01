@@ -1,11 +1,25 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings  # ← 追加
+from django.contrib.auth.models import AbstractUser
 import json
+
+class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = [
+        ('student', '学生'),
+        ('teacher', '教員'),
+    ]
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='student')
+    student_id = models.CharField(max_length=20, blank=True, null=True)
+    grade = models.CharField(max_length=10, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.username} ({self.get_user_type_display()})"
 
 class Group(models.Model):
     name = models.CharField(max_length=100, verbose_name='グループ名')
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teaching_groups', verbose_name='担当教員')
-    students = models.ManyToManyField(User, related_name='student_groups', blank=True, verbose_name='学生')
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teaching_groups', verbose_name='担当教員')
+    students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='student_groups', blank=True, verbose_name='学生')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='作成日時')
     
     class Meta:
@@ -19,7 +33,7 @@ class ReadingMaterial(models.Model):
     title = models.CharField(max_length=200, verbose_name='タイトル')
     content = models.TextField(verbose_name='本文')
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='対象グループ')
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='作成者')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='作成者')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='作成日時')
     
     class Meta:
@@ -52,7 +66,7 @@ class Question(models.Model):
         return f"{self.material.title} - 問題{self.order}"
 
 class StudentAnswer(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='学生')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生')
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='問題')
     answer_text = models.TextField(verbose_name='回答内容')
     reasoning_note = models.TextField(blank=True, verbose_name='思考過程のノート')
@@ -82,7 +96,7 @@ class Annotation(models.Model):
         ('#ffcc99', 'オレンジ'),
     ]
     
-    student = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='学生')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生')
     material = models.ForeignKey(ReadingMaterial, on_delete=models.CASCADE, verbose_name='教材')
     annotation_type = models.CharField(max_length=20, choices=ANNOTATION_TYPES, verbose_name='注釈タイプ')
     start_position = models.IntegerField(verbose_name='開始位置')
@@ -99,7 +113,7 @@ class Annotation(models.Model):
         return f"{self.student.username} - {self.get_annotation_type_display()}"
 
 class Comment(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='投稿者')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='投稿者')
     target_answer = models.ForeignKey(StudentAnswer, on_delete=models.CASCADE, related_name='comments', verbose_name='対象回答')
     content = models.TextField(verbose_name='コメント内容')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='投稿日時')
@@ -120,8 +134,8 @@ class Notification(models.Model):
         ('mention', 'メンション'),
     ]
     
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', verbose_name='受信者')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications', verbose_name='送信者')
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications', verbose_name='受信者')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_notifications', verbose_name='送信者')
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, verbose_name='通知タイプ')
     title = models.CharField(max_length=200, verbose_name='タイトル')
     message = models.TextField(verbose_name='メッセージ')
@@ -136,23 +150,3 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.recipient.username} - {self.title}"
-
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-
-# ★これ忘れてた★
-class CustomUser(AbstractUser):
-    USER_TYPE_CHOICES = [
-        ('student', '学生'),
-        ('teacher', '教員'),
-    ]
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='student')
-    student_id = models.CharField(max_length=20, blank=True, null=True)
-    grade = models.CharField(max_length=10, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.username} ({self.get_user_type_display()})"
