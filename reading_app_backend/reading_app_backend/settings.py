@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'reading',
+    'reading.apps.ReadingConfig',  # 'reading' からこちらに変更
 ]
 
 # reading_app_backend/reading_app_backend/settings.py
