@@ -26,10 +26,11 @@ INSTALLED_APPS = [
     'reading',
 ]
 
+# reading_app_backend/reading_app_backend/settings.py
+
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # 追加
+    'whitenoise.middleware.WhiteNoiseMiddleware', # この行を SecurityMiddleware の直後に追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -37,6 +38,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# STATIC_ROOT の設定も確認
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 ROOT_URLCONF = 'reading_app_backend.urls'
 
