@@ -135,7 +135,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-iota.vercel.app',  # VercelのURLに置き換え忘れず
 ]
 
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'your-vercel-app.vercel.app']
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app']
 
 # 本番環境用の追加設定
 if not DEBUG:
