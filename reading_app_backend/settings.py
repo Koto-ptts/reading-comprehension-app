@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # この順序が重要
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,6 +81,15 @@ else:
 # カスタムユーザーモデルの設定
 AUTH_USER_MODEL = 'reading.CustomUser'
 
+# 認証バックエンドを明示的に設定（管理画面ログイン修正）
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# セッション設定（管理画面ログイン修正）
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24時間
+
 # REST Framework設定
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -114,9 +123,12 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Static files (static files問題修正)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise設定（static files修正）
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -127,14 +139,20 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://reading-comprehension-app-iota.vercel.app",
+    "https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app",  # 実際のVercel URL
 ]
 
-# CSRF設定
+# CSRF設定（管理画面ログイン修正）
 CSRF_TRUSTED_ORIGINS = [
-    'https://reading-comprehension-app-production.up.railway.app',  # 具体的なドメイン追加
+    'https://reading-comprehension-app-production.up.railway.app',
     'https://*.railway.app',
     'https://reading-comprehension-app-iota.vercel.app',
+    'https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app',
 ]
+
+# セキュリティ設定追加（CSRF問題修正）
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = None
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
