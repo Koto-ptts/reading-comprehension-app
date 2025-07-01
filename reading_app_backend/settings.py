@@ -8,11 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # 一時的にTrueに戻す
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # Railway用のALLOWED_HOSTS設定（具体的なドメインを追加）
 ALLOWED_HOSTS = [
-    'reading-comprehension-app-production.up.railway.app',  # 具体的なドメイン追加
+    'reading-comprehension-app-production.up.railway.app',
     '*.railway.app',
     '127.0.0.1', 
     'localhost'
@@ -20,7 +20,7 @@ ALLOWED_HOSTS = [
 
 # Application definition
 INSTALLED_APPS = [
-    'reading',  # CustomUserモデルを最初に読み込む
+    'reading',
     'django.contrib.admin',
     'django.contrib.auth', 
     'django.contrib.contenttypes',
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # この順序が重要
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,14 +81,14 @@ else:
 # カスタムユーザーモデルの設定
 AUTH_USER_MODEL = 'reading.CustomUser'
 
-# 認証バックエンドを明示的に設定（管理画面ログイン修正）
+# 認証バックエンドを明示的に設定
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# セッション設定（管理画面ログイン修正）
+# セッション設定
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 86400  # 24時間
+SESSION_COOKIE_AGE = 86400
 
 # REST Framework設定
 REST_FRAMEWORK = {
@@ -123,26 +123,33 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (static files問題修正)
+# Static files (Django 4.2対応)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise設定（static files修正）
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Django 4.2以降の新しい設定方法
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CORS設定（本番環境用）
+# CORS設定
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://reading-comprehension-app-iota.vercel.app",
-    "https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app",  # 実際のVercel URL
+    "https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app",
 ]
 
-# CSRF設定（管理画面ログイン修正）
+# CSRF設定
 CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-production.up.railway.app',
     'https://*.railway.app',
@@ -150,7 +157,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app',
 ]
 
-# セキュリティ設定追加（CSRF問題修正）
+# セキュリティ設定
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SAMESITE = None
 
