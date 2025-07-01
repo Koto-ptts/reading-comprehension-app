@@ -96,6 +96,8 @@ USE_TZ = True
 # Static files (Django 4.2対応 & WhiteNoise修正)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# WhiteNoise用の設定を追加
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STORAGES = {
     "default": {
