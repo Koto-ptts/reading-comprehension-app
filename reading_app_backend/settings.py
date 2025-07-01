@@ -9,12 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-secret-key-for-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # 一時的にTrueに戻す
 
-# ★ ALLOWED_HOSTS を直接指定して問題を解決します ★
+# ALLOWED_HOSTS
 ALLOWED_HOSTS = [
     'reading-comprehension-app-production.up.railway.app',
-    '.railway.app', # railway.app の全てのサブドメインを許可
+    '.railway.app',
     'localhost',
     '127.0.0.1',
 ]
@@ -81,6 +81,22 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+# REST Framework設定（重要！）
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# セッション設定（ログイン問題修正）
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24時間
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -112,7 +128,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app",
 ]
 
-# CSRF設定
+# CSRF設定（緩和）
 CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-production.up.railway.app',
     'https://*.railway.app',
@@ -120,11 +136,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app',
 ]
 
-# 本番環境用のセッションとクッキーの設定
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    CSRF_COOKIE_SAMESITE = 'Lax'
+# セッション・CSRF設定（ログイン問題修正）
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # 一時的に緩和
+SESSION_COOKIE_HTTPONLY = True
+
+# 本番環境でもSecure設定を一時的に無効化
+# if not DEBUG:
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
