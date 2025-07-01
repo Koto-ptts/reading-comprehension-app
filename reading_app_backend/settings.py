@@ -15,8 +15,9 @@ ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
+    'reading',  # ← CustomUserモデルを最初に読み込む
     'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.auth', 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -24,8 +25,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'reading.apps.ReadingConfig',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
