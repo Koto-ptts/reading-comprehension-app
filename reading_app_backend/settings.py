@@ -123,11 +123,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS設定
+# CORS設定を更新
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://reading-comprehension-app-iota.vercel.app",  # VercelのURLに置き換え忘れず
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://reading-comprehension-app-iota.vercel.app',  # VercelのURLに置き換え忘れず
+]
+
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'your-vercel-app.vercel.app']
 
 # 本番環境用の追加設定
 if not DEBUG:
