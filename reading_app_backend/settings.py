@@ -8,14 +8,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # 一時的にTrueに戻す
 
-# 本番環境用のALLOWED_HOSTS設定
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
+# Railway用のALLOWED_HOSTS設定（具体的なドメインを追加）
+ALLOWED_HOSTS = [
+    'reading-comprehension-app-production.up.railway.app',  # 具体的なドメイン追加
+    '*.railway.app',
+    '127.0.0.1', 
+    'localhost'
+]
 
 # Application definition
 INSTALLED_APPS = [
-    'reading',  # ← CustomUserモデルを最初に読み込む
+    'reading',  # CustomUserモデルを最初に読み込む
     'django.contrib.admin',
     'django.contrib.auth', 
     'django.contrib.contenttypes',
@@ -121,20 +126,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://reading-comprehension-app-iota.vercel.app",  # フロントエンドURL
+    "https://reading-comprehension-app-iota.vercel.app",
 ]
 
-# 本番環境でのCSRF設定
+# CSRF設定
 CSRF_TRUSTED_ORIGINS = [
+    'https://reading-comprehension-app-production.up.railway.app',  # 具体的なドメイン追加
     'https://*.railway.app',
     'https://reading-comprehension-app-iota.vercel.app',
 ]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# セキュリティ設定（本番環境用）
-if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
