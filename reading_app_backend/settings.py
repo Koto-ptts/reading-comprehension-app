@@ -10,7 +10,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app',).split(',')
+# 正しいALLOWED_HOSTS設定
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -23,14 +24,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'reading.apps.ReadingConfig',  # 'reading' からこちらに変更
+    'reading.apps.ReadingConfig',
 ]
-
-# reading_app_backend/reading_app_backend/settings.py
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # この行を SecurityMiddleware の直後に追加
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ← 追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -38,9 +38,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# STATIC_ROOT の設定も確認
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 ROOT_URLCONF = 'reading_app_backend.urls'
 
@@ -112,7 +109,7 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -120,115 +117,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# CORS設定を更新
+# CORS設定
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://reading-comprehension-app-iota.vercel.app",  # VercelのURLに置き換え忘れず
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-    'https://reading-comprehension-app-iota.vercel.app',  # VercelのURLに置き換え忘れず
-]
-
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app']
-
-# 本番環境用の追加設定
-if not DEBUG:
-    ALLOWED_HOSTS.extend(['*.railway.app'])
-    CORS_ALLOWED_ORIGINS.extend(['https://*.railway.app'])
-    CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
-
-# REST Framework設定
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
-
-# Channels設定
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
-
-# カスタムユーザーモデルの設定
-AUTH_USER_MODEL = 'reading.CustomUser'
-
-# 認証設定
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
-
-# トークン認証の追加
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',  # 追加
-    'corsheaders',
-    'reading',
-]
-
-# 環境変数の設定
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app', ).split(',')
-
-# データベース設定（本番環境用）
-if os.environ.get('DATABASE_URL'):
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-    }
-else:
-    # 開発環境用（既存の設定）
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
-# セキュリティ設定
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
-
-# CORS設定（本番環境用）
-CORS_ALLOWED_ORIGINS = [
-    "https://your-frontend-domain.com",  # 本番環境のフロントエンドURL
-    "http://localhost:3000",  # 開発環境
-    "http://127.0.0.1:3000",
-]
-
-# 静的ファイル設定
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# メディアファイル設定
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# 静的ファイル設定
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# 本番環境用設定
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app',]
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
