@@ -10,7 +10,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app',).split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -190,7 +190,7 @@ INSTALLED_APPS = [
 
 # 環境変数の設定
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app', ).split(',')
 
 # データベース設定（本番環境用）
 if os.environ.get('DATABASE_URL'):
@@ -230,5 +230,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # 本番環境用設定
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost', 'https://reading-comprehension-app-iota.vercel.app',]
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']

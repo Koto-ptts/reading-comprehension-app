@@ -1,1 +1,2 @@
-gunicorn==21.2.0
+# ローカルで確認
+cat requirements.txt
