@@ -8,10 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# 一時的にTrueにしてエラーを特定
+DEBUG = True  # 一時的にTrueに変更
 
-# 正しいALLOWED_HOSTS設定
-ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
+# Railway用のALLOWED_HOSTS設定
+ALLOWED_HOSTS = ['*']  # 一時的に全て許可してテスト
 
 # Application definition
 INSTALLED_APPS = [
@@ -27,11 +28,10 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # ← 追加
+    'corsheaders.middleware.CorsMiddleware',  # CORSを最初の方に
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,12 +118,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CORS設定
+# CORS設定（Railway対応）
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
+# 全てのOriginを一時的に許可（テスト用）
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CSRF設定
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
 
 # Default primary key field type
