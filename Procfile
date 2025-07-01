@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn reading_app_backend.wsgi:application --workers 2 --forwarded-allow-ips '*' --log-file -
+web: python manage.py migrate && gunicorn reading_app_backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --forwarded-allow-ips '*'
