@@ -8,11 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# 一時的にTrueにしてエラーを特定
-DEBUG = True  # 一時的にTrueに変更
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Railway用のALLOWED_HOSTS設定
-ALLOWED_HOSTS = ['*']  # 一時的に全て許可してテスト
+# 本番環境用のALLOWED_HOSTS設定
+ALLOWED_HOSTS = ['*.railway.app', '127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -31,7 +30,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # CORSを最初の方に
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,17 +117,24 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CORS設定（Railway対応）
+# CORS設定（本番環境用）
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://reading-comprehension-app-iota.vercel.app",  # フロントエンドURL
 ]
 
-# 全てのOriginを一時的に許可（テスト用）
-CORS_ALLOW_ALL_ORIGINS = True
-
-# CSRF設定
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+# 本番環境でのCSRF設定
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://reading-comprehension-app-iota.vercel.app',
+]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# セキュリティ設定（本番環境用）
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
