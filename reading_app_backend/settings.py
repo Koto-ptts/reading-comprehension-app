@@ -5,27 +5,28 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-super-secure-secret-key-that-you-will-set-on-railway')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Railway用のALLOWED_HOSTS設定（具体的なドメインを追加）
+# Railway用のALLOWED_HOSTS設定
 ALLOWED_HOSTS = [
     'reading-comprehension-app-production.up.railway.app',
     '*.railway.app',
-    '127.0.0.1', 
+    '127.0.0.1',
     'localhost'
 ]
 
 # Application definition
 INSTALLED_APPS = [
-    'reading',
+    'reading',  # CustomUserモデルを最初に読み込む
     'django.contrib.admin',
-    'django.contrib.auth', 
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', # whitenoise を追加
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
@@ -34,7 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # この順序が重要
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,40 +82,9 @@ else:
 # カスタムユーザーモデルの設定
 AUTH_USER_MODEL = 'reading.CustomUser'
 
-# 認証バックエンドを明示的に設定
+# 認証バックエンドを明示的に設定（管理画面ログイン修正）
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-]
-
-# セッション設定
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 86400
-
-# REST Framework設定
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
-
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
 ]
 
 # Internationalization
@@ -123,11 +93,10 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (Django 4.2対応)
+# Static files (Django 4.2対応 & WhiteNoise修正)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Django 4.2以降の新しい設定方法
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -141,7 +110,7 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CORS設定
+# CORS設定（本番環境用）
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -156,10 +125,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-iota.vercel.app',
     'https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app',
 ]
-
-# セキュリティ設定
-CSRF_COOKIE_SAMESITE = None
-SESSION_COOKIE_SAMESITE = None
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
