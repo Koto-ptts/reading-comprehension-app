@@ -1,5 +1,11 @@
-[build]
-cmds = ["python manage.py collectstatic --noinput"]
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.11"
+
+[phases.setup]
+nixPkgs = ["python311", "postgresql"]
+
+[phases.build]
+cmds = ["python -m pip install -r requirements.txt", "python manage.py collectstatic --noinput"]
 
 [start]
-cmd = "python manage.py migrate && gunicorn reading_app_backend.wsgi"
+cmd = "python manage.py migrate && gunicorn reading_app_backend.wsgi:application --workers 2 --forwarded-allow-ips '*' --bind 0.0.0.0:$PORT"
