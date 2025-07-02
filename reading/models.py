@@ -1,8 +1,29 @@
 from django.db import models
-from django.conf import settings  # ← 追加
-from django.contrib.auth.models import AbstractUser
-import json
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+# --- ユーザーマネージャー ---
+class CustomUserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(self, username, email=None, password=None, user_type='student', **extra_fields):
+        if not username:
+            raise ValueError('ユーザー名は必須です')
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, user_type=user_type, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, user_type='teacher', **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        if user_type != 'teacher':
+            user_type = 'teacher'
+        return self.create_user(username, email, password, user_type, **extra_fields)
+
+# --- ユーザーモデル ---
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = [
         ('student', '学生'),
@@ -13,9 +34,16 @@ class CustomUser(AbstractUser):
     grade = models.CharField(max_length=10, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # 追加
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'user_type']
+
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
 
+# --- グループ ---
 class Group(models.Model):
     name = models.CharField(max_length=100, verbose_name='グループ名')
     teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teaching_groups', verbose_name='担当教員')
@@ -29,6 +57,7 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+# --- 読解教材 ---
 class ReadingMaterial(models.Model):
     title = models.CharField(max_length=200, verbose_name='タイトル')
     content = models.TextField(verbose_name='本文')
@@ -43,12 +72,12 @@ class ReadingMaterial(models.Model):
     def __str__(self):
         return self.title
 
+# --- 問題 ---
 class Question(models.Model):
     QUESTION_TYPES = [
         ('multiple_choice', '選択式'),
         ('descriptive', '記述式'),
     ]
-    
     material = models.ForeignKey(ReadingMaterial, on_delete=models.CASCADE, related_name='questions', verbose_name='教材')
     question_text = models.TextField(verbose_name='問題文')
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, verbose_name='問題形式')
@@ -65,6 +94,7 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.material.title} - 問題{self.order}"
 
+# --- 学生回答 ---
 class StudentAnswer(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生')
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='問題')
@@ -82,12 +112,12 @@ class StudentAnswer(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.question}"
 
+# --- 注釈 ---
 class Annotation(models.Model):
     ANNOTATION_TYPES = [
         ('sticky_note', '付箋'),
         ('highlight', 'マーカー'),
     ]
-    
     COLORS = [
         ('#ffff00', '黄色'),
         ('#ff9999', '赤色'),
@@ -95,7 +125,6 @@ class Annotation(models.Model):
         ('#9999ff', '青色'),
         ('#ffcc99', 'オレンジ'),
     ]
-    
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生')
     material = models.ForeignKey(ReadingMaterial, on_delete=models.CASCADE, verbose_name='教材')
     annotation_type = models.CharField(max_length=20, choices=ANNOTATION_TYPES, verbose_name='注釈タイプ')
@@ -112,6 +141,7 @@ class Annotation(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.get_annotation_type_display()}"
 
+# --- コメント ---
 class Comment(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='投稿者')
     target_answer = models.ForeignKey(StudentAnswer, on_delete=models.CASCADE, related_name='comments', verbose_name='対象回答')
@@ -127,13 +157,13 @@ class Comment(models.Model):
     def __str__(self):
         return f"{self.author.username} → {self.target_answer.student.username}"
 
+# --- 通知 ---
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('comment', 'コメント'),
         ('question', '質問'),
         ('mention', 'メンション'),
     ]
-    
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications', verbose_name='受信者')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_notifications', verbose_name='送信者')
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, verbose_name='通知タイプ')
