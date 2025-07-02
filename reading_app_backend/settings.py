@@ -60,11 +60,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reading_app_backend.wsgi.application'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'
-    )
-}
+# ★★★ 重要な修正：本番DBとローカルDBを適切に分ける ★★★
+if 'DATABASE_URL' in os.environ:
+    # 本番環境（Railway）: DATABASE_URL環境変数が存在する場合
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ['DATABASE_URL']
+        )
+    }
+else:
+    # ローカル環境：SQLiteを使用
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_USER_MODEL = 'reading.CustomUser'
 
@@ -120,12 +131,22 @@ CSRF_TRUSTED_ORIGINS = [
     'https://reading-comprehension-app-git-main-koto-usudas-projects.vercel.app',
 ]
 
-# ★ セッション・CSRF設定を一時的に緩和（SecureをFalse、SameSiteもNone）★
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SAMESITE = None
-SESSION_COOKIE_SAMESITE = None
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_HTTPONLY = True
+# ★★★ 本番環境では適切なセキュリティ設定を使用 ★★★
+if DEBUG:
+    # 開発環境：デバッグ用に緩和した設定
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SAMESITE = None
+    SESSION_COOKIE_SAMESITE = None
+    CSRF_COOKIE_HTTPONLY = False
+    SESSION_COOKIE_HTTPONLY = True
+else:
+    # 本番環境：セキュアな設定
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_HTTPONLY = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
